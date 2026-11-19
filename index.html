@@ -83,5 +83,174 @@ function hearts(){const area=$('hearts');for(let i=0;i<18;i++){const h=document.
 $('forgive').addEventListener('click',()=>{hearts();$('response').textContent='A tiny step towards a happy ending. Thank you for hearing me. 💞';$('forgive').textContent='Sending you a big hug! 🫂';});
 decodeGift();sync();
 </script>
+
+<!-- LITTLE SORRY UPGRADE -->
+<style>
+#ls-upgrade {
+  background: linear-gradient(145deg,#fff0f6,#ffe0ed,#fff5fa);
+  color:#9b426b;
+  padding:25px 16px;
+  text-align:center;
+  font-family:Georgia,serif;
+  border-radius:22px;
+  margin:20px 0;
+}
+#ls-upgrade h2 {color:#d65388;}
+#ls-upgrade .ls-btn {
+  background:#e879a5;color:white;border:0;
+  padding:13px 19px;border-radius:25px;
+  margin:7px;font-size:15px;cursor:pointer;
+}
+#ls-upgrade .ls-panel {
+  background:#fff;border-radius:18px;
+  padding:17px;margin:15px 0;
+}
+#ls-upgrade .ls-hidden {display:none;}
+#ls-upgrade .ls-heart {
+  position:fixed;bottom:-30px;
+  animation:ls-float 7s linear forwards;
+  pointer-events:none;z-index:9999;
+}
+@keyframes ls-float {
+  to {transform:translateY(-110vh) rotate(35deg);opacity:0;}
+}
+#ls-upgrade img {
+  width:100%;max-width:125px;
+  height:125px;object-fit:cover;
+  border-radius:14px;margin:5px;
+}
+</style>
+
+<section id="ls-upgrade">
+  <h2>💕 A Little More Love 💕</h2>
+  <p>Because you deserve a few extra surprises...</p>
+
+  <div class="ls-panel">
+    <h3>💌 A Secret Letter</h3>
+    <p>A little message, just for you.</p>
+    <button class="ls-btn" onclick="lsToggle('ls-letter')">
+      Open My Letter 💗
+    </button>
+    <div id="ls-letter" class="ls-hidden">
+      <p>Dear you,</p>
+      <p>I'm sorry for the moments when I made you feel less special.
+      You mean more to me than words can explain.
+      I hope we can make more beautiful memories together. ❤️</p>
+      <p>With love, always. 💕</p>
+    </div>
+  </div>
+
+  <div class="ls-panel">
+    <h3>📸 Our Memories</h3>
+    <p>Add your favourite photos together.</p>
+    <input type="file" accept="image/*" multiple
+      onchange="lsPhotos(this)">
+    <div id="ls-gallery"></div>
+  </div>
+
+  <div class="ls-panel">
+    <h3>🥺 Can You Forgive Me?</h3>
+    <p>I'm waiting with all my heart...</p>
+    <button class="ls-btn" onclick="lsForgive()">
+      Yes, I forgive you 💖
+    </button>
+    <p id="ls-forgive-message"></p>
+  </div>
+
+  <div class="ls-panel">
+    <h3>🎁 A Little Surprise</h3>
+    <button class="ls-btn" onclick="lsToggle('ls-surprise')">
+      Open Your Surprise ✨
+    </button>
+    <div id="ls-surprise" class="ls-hidden">
+      <h3>YOU ARE SPECIAL! 💗</h3>
+      <p>If I could choose again, I'd still choose making
+      beautiful memories with you.</p>
+      <p>Sending you a thousand hugs! 🫂</p>
+    </div>
+  </div>
+
+  <div class="ls-panel">
+    <h3>🎵 A Little Music</h3>
+    <p>Listen to a soft original melody.</p>
+    <button class="ls-btn" id="ls-music"
+      onclick="lsMusic()">▶ Play Music</button>
+  </div>
+
+  <p>Made with lots of love 💕</p>
+</section>
+
+<script>
+(function(){
+  window.lsToggle=function(id){
+    document.getElementById(id).classList.toggle('ls-hidden');
+  };
+
+  window.lsForgive=function(){
+    document.getElementById('ls-forgive-message').innerHTML=
+      'YAY! 🥹💗 You just made my heart smile!';
+    for(let i=0;i<12;i++) lsHeart();
+  };
+
+  function lsHeart(){
+    const h=document.createElement('div');
+    h.className='ls-heart';
+    h.textContent=['💗','💕','❤️','💖'][Math.floor(Math.random()*4)];
+    h.style.left=Math.random()*95+'vw';
+    h.style.fontSize=(18+Math.random()*20)+'px';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),7000);
+  }
+
+  setInterval(lsHeart,1200);
+
+  window.lsPhotos=function(input){
+    const gallery=document.getElementById('ls-gallery');
+    Array.from(input.files).forEach(file=>{
+      if(!file.type.startsWith('image/'))return;
+      const img=document.createElement('img');
+      img.src=URL.createObjectURL(file);
+      gallery.appendChild(img);
+    });
+  };
+
+  let audio=null, timer=null, playing=false;
+  let note=0;
+  const notes=[261.63,329.63,392,329.63,293.66,349.23,392,349.23];
+
+  window.lsMusic=function(){
+    const btn=document.getElementById('ls-music');
+    if(playing){
+      clearInterval(timer);
+      audio.close();
+      audio=null;
+      playing=false;
+      btn.textContent='▶ Play Music';
+      return;
+    }
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC){btn.textContent='Music unavailable';return;}
+    audio=new AC();
+    audio.resume();
+    playing=true;
+    function playNote(){
+      const osc=audio.createOscillator();
+      const gain=audio.createGain();
+      osc.type='sine';
+      osc.frequency.value=notes[note++%notes.length];
+      gain.gain.setValueAtTime(0.0001,audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.045,audio.currentTime+0.15);
+      gain.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+0.8);
+      osc.connect(gain);
+      gain.connect(audio.destination);
+      osc.start();
+      osc.stop(audio.currentTime+0.85);
+    }
+    playNote();
+    timer=setInterval(playNote,900);
+    btn.textContent='⏸ Pause Music';
+  };
+})();
+</script>
 </body>
 </html>
